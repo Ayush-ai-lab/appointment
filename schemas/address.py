@@ -1,8 +1,9 @@
 from pydantic import BaseModel 
 
 class AddressSchema(BaseModel):
-    Country : str
-    State : str 
-    City : str 
+    country : str
+    state : str 
+    city : str 
     street_address : str
     address : str
+    pin_code: int

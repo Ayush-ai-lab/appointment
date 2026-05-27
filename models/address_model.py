@@ -10,7 +10,8 @@ class Address(Base):
     country = Column(String)
     state = Column(String)
     city = Column(String)
-    Street_Address = Column(String)
-    Address = Column(String)
+    street_Address = Column(String)
+    address = Column(String)
+    pin_code = Column(Integer)
 
     
