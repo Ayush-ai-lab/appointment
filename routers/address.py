@@ -2,7 +2,7 @@ from fastapi import APIRouter,Depends
 from schemas.address import AddressSchema
 from services.address_service import Add_address, Update_address, get_all_address, get_single_address, delete_address
 from core.database import get_db
-from fastapi import Depends
+
 from sqlalchemy.orm import Session
 
 
