@@ -12,7 +12,7 @@ def create_doctor(data, db):
         updated_by = data.updated_by
     ) 
 
-    db.new(new_doctor)
+    db.add(new_doctor)
     db.commit()
     db.refresh(new_doctor)
 
@@ -48,3 +48,41 @@ def get_single_doctor(id,db):
     }
 
 
+def update_doctor(id,data,db):
+    doctor = db.query(Doctor).filter(Doctor.id == id).first()
+
+    if not doctor:
+        return {
+            "message" : "no record found"
+        }
+    
+    doctor.name = data.name
+    doctor.email = data.email
+    doctor.number = data.number
+    doctor.experience = data.experience
+    doctor.qualification = data.qualification
+    doctor.bio = data.bio
+    doctor.updated_by = data.updated_by
+
+    db.commit()
+    db.refresh(doctor)
+
+    return {
+        "message" : "record updated successfully",
+        "data" : doctor
+    }
+
+def delete_doctor(id,db):
+    doctor = db.query(Doctor).filter(Doctor.id == id).first()
+
+    if not doctor:
+        return {
+            "message" : "no record found"
+        }
+    
+    db.delete(doctor)
+    db.commit()
+
+    return {
+        "message" : "record deleted successfully"
+    }
