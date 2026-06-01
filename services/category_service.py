@@ -1,80 +1,60 @@
 from models.category_model import Category
 
-def create_category(data,db):
-    new_category = Category(
-        name = data.name,
-        short_description = data.short_description,
-        description = data.description,
-        status = data.status
-        create_by = data.create_by
+
+def create_category(data, db):
+    category = Category(
+        name=data.name,
+        department_id=data.department_id,
+        slug=data.slug,
+        short_description=data.short_description,
+        description=data.description,
+        status=data.status,
+        created_by=data.created_by,
+        updated_by=data.updated_by,
     )
-
-    db.add(new_category)
+    db.add(category)
     db.commit()
-    db.refresh(new_category)
+    db.refresh(category)
+    return {"message": "Category created successfully", "data": category}
 
-    return {
-        "message": "Category created successfully"
-    }
 
 def get_all_category(db):
-    category = db.query(Category).all()
+    categories = db.query(Category).all()
+    if not categories:
+        return {"message": "No category found"}
+    return {"message": "Categories fetch successfully", "data": categories}
 
-    if not category:
-        return {
-            "message": "No category found"
-        }
-    
-    return {
-        "message" : "Category fetch successfully",
-        "data" : category
-    }
 
-def get_single_category(id,db):
+def get_single_category(id, db):
     category = db.query(Category).filter(Category.id == id).first()
-
     if not category:
-        return {
-            "message": "No category found"
-        }
-    
-    return {
-        "message" : "Category fetch successfully",
-        "data" : category
-    }
+        return {"message": "No category found"}
+    return {"message": "Category fetch successfully", "data": category}
 
-def delete_category(id,db):
+
+def update_category(id, data, db):
     category = db.query(Category).filter(Category.id == id).first()
-
     if not category:
-        return {
-            "message": "No category found"
-        }
-    
+        return {"message": "No category found"}
+
+    category.name = data.name
+    category.department_id = data.department_id
+    category.slug = data.slug
+    category.short_description = data.short_description
+    category.description = data.description
+    category.status = data.status
+    category.updated_by = data.updated_by
+
+    db.commit()
+    db.refresh(category)
+    return {"message": "Category update successfully", "data": category}
+
+
+def delete_category(id, db):
+    category = db.query(Category).filter(Category.id == id).first()
+    if not category:
+        return {"message": "No category found"}
+
     db.delete(category)
     db.commit()
-
-    return {
-        "message": "record delete successfully"
-    }
-
-
-def update_category(id,data,db):
-    old_category = db.query(Category).filter(Category.id == id).first()
-
-    if not old_category:
-        return {
-            "message": "No category found"
-        }
-    
-    old_category.name = data.name
-    old_category.short_description = data.short_description
-    old_category.description = data.description
-    old_category.status = data.status
-
-    db.commit()
-    db.refresh(old_category)
-    return {
-        "message": "Category update successfully",
-        
-    }
+    return {"message": "Category delete successfully"}

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 class DepartmentSchemas(BaseModel):
@@ -6,5 +8,6 @@ class DepartmentSchemas(BaseModel):
     icon : str
     image : str
     status : str 
-    created_by : str
+    created_by : Optional[str] = None
+    updated_by : Optional[str] = None
     

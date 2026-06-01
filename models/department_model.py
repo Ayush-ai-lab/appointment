@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String,Integer, ForeignKey, DateTime
 from core.database import Base 
 from datetime import datetime
+from sqlalchemy.orm import relationship
 class Department(Base):
     __tablename__ = "department"
 
@@ -11,5 +12,10 @@ class Department(Base):
     image = Column(String)
     status = Column(String)
     created_by = Column(String)
-    created_at = Column(DateTime)
-    updated_at = Column(DateTime)
+    updated_by = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+    appointments = relationship("Appointment",back_populates="department")
+    categories = relationship("Category", back_populates="department")

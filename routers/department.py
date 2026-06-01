@@ -4,7 +4,7 @@ from schemas.department import DepartmentSchemas
 from core.database import get_db
 from sqlalchemy.orm import Session
 
-router = APIRouter(prefix="/department",tags="department")
+router = APIRouter(prefix="/department", tags=["department"])
 
 @router.post("/create-department")
 def CreateDepartment(department : DepartmentSchemas,  db: Session = Depends(get_db)):
@@ -18,11 +18,11 @@ def GetDepartments(db:Session = Depends(get_db)):
 def GetSingleDepartment(id: int, db:Session = Depends(get_db)):
     return get_single_department(id,db)
 
-@router.delete("delete-department/{id}")
+@router.delete("/delete-department/{id}")
 def DeleteDepartment(id: int, db:Session = Depends(get_db)):
     return delete_department(id, db)
 
 
-@router.put("update-department/{id}")
+@router.put("/update-department/{id}")
 def UpdateDepartment(id : int,department : DepartmentSchemas, db:Session = Depends(get_db)):
-    return update_department(id, db, department)
+    return update_department(id, department, db)

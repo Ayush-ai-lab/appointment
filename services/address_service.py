@@ -1,78 +1,64 @@
 from models.address_model import Address
 
-def Add_address(address, db):
-    address = Address(
-        country = address.country,
-        state = address.state,
-        city = address.city,
-        address = address.address,
-        street_address = address.street_address,
-        pin_code = address.pin_code
-    )
 
+def Add_address(data, db):
+    address = Address(
+        country=data.country,
+        state=data.state,
+        city=data.city,
+        street_address=data.street_address,
+        address=data.address,
+        pin_code=data.pin_code,
+        user_id=data.user_id,
+        created_by=data.created_by,
+        updated_by=data.updated_by,
+        status=data.status,
+    )
     db.add(address)
     db.commit()
     db.refresh(address)
-    return {
-        "message": "Address Added Successfully",
-        "data": address
-    }
+    return {"message": "Address created successfully", "data": address}
 
-def UpdateAddress(id, address, db):
-    old_address = db.query(Address).filter(Address.id == id).first()
-
-    if not old_address:
-        return {
-            "message" : "No address found"
-        }
-    
-
-    old_address.country = address.country
-    old_address.state = address.state
-    old_address.city = address.city
-    old_address.street_address = address.street_address
-    old_address.address = address.address
-    old_address.pin_code = address.pin_code
-
-    db.commit()
-    db.refresh(old_address)
-    return {
-        "message" : "address update successfully"
-    }
 
 def get_all_address(db):
     addresses = db.query(Address).all()
     if not addresses:
-        return {
-            "message" : "No address found"
-        }
-    return {
-        "message": "All record get successfully",
-        "data" : addresses
-    }
+        return {"message": "No address found"}
+    return {"message": "Addresses fetch successfully", "data": addresses}
 
-def get_single_address(id,db):
+
+def get_single_address(id, db):
     address = db.query(Address).filter(Address.id == id).first()
     if not address:
-        return {
-            "message" : "No address found"
-        }
-    return {
-        "message": "Record get successfully",
-        "data" : address
-    }
+        return {"message": "No address found"}
+    return {"message": "Address fetch successfully", "data": address}
 
-def delete_address(id,db):
+
+def update_address(id, data, db):
     address = db.query(Address).filter(Address.id == id).first()
-
     if not address:
-        return {
-            "message" : "No address found"
-        }
-    
+        return {"message": "No address found"}
+
+    address.country = data.country
+    address.state = data.state
+    address.city = data.city
+    address.street_address = data.street_address
+    address.address = data.address
+    address.pin_code = data.pin_code
+    address.user_id = data.user_id
+    address.updated_by = data.updated_by
+    address.status = data.status
+
+    db.commit()
+    db.refresh(address)
+    return {"message": "Address update successfully", "data": address}
+
+
+def delete_address(id, db):
+    address = db.query(Address).filter(Address.id == id).first()
+    if not address:
+        return {"message": "No address found"}
+
     db.delete(address)
     db.commit()
-  
-    return {
-        "message" : "Address delete successfully"
-    }
+    return {"message": "Address delete successfully"}

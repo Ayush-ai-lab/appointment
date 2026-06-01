@@ -1,6 +1,6 @@
 from fastapi import APIRouter,Depends
 from schemas.address import AddressSchema
-from services.address_service import Add_address, Update_address, get_all_address, get_single_address, delete_address
+from services.address_service import Add_address, update_address, get_all_address, get_single_address, delete_address
 from core.database import get_db
 
 from sqlalchemy.orm import Session
@@ -14,7 +14,7 @@ def CreateAddress(address : AddressSchema, db: Session = Depends(get_db)):
 
 @routes.post("/update-address/{id}")
 def UpdateAddress(id : int, address: AddressSchema, db: Session = Depends(get_db) ):
-    return Update_address(id, address,db)
+    return update_address(id, address,db)
 
 @routes.get("/")
 def GetAll(db: Session = Depends(get_db)):

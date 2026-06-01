@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 class DoctorSchema(BaseModel):
@@ -7,7 +9,9 @@ class DoctorSchema(BaseModel):
     experience : int 
     qualification : str 
     bio : str 
-    created_by : str
-    updated_by : str 
+    category_id: Optional[int] = None
+    status: Optional[str] = None
+    created_by : Optional[str] = None
+    updated_by : Optional[str] = None
 
 
