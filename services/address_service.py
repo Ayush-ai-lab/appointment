@@ -1,4 +1,5 @@
 from models.address_model import Address
+from sqlalchemy import or_
 
 
 def Add_address(data, db):
@@ -20,11 +21,49 @@ def Add_address(data, db):
     return {"message": "Address created successfully", "data": address}
 
 
-def get_all_address(db):
-    addresses = db.query(Address).all()
-    if not addresses:
-        return {"message": "No address found"}
-    return {"message": "Addresses fetch successfully", "data": addresses}
+def get_all_address(db, page: int = 1, limit: int = 12, search: str = None, status: str = None, user_id: int = None, sort_by: str = "id", sort_order: str = "asc"):
+    query = db.query(Address)
+
+    if status is not None:
+        query = query.filter(Address.status == status)
+
+    if user_id is not None:
+        query = query.filter(Address.user_id == user_id)
+
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            or_(
+                Address.country.ilike(search_term),
+                Address.state.ilike(search_term),
+                Address.city.ilike(search_term),
+                Address.street_address.ilike(search_term),
+                Address.address.ilike(search_term),
+            )
+        )
+
+    total = query.count()
+    sort_column = getattr(Address, sort_by, Address.id)
+    if sort_order and sort_order.lower() == "desc":
+        query = query.order_by(sort_column.desc())
+    else:
+        query = query.order_by(sort_column.asc())
+
+    if page < 1:
+        page = 1
+    if limit < 1:
+        limit = 12
+
+    offset = (page - 1) * limit
+    addresses = query.offset(offset).limit(limit).all()
+
+    return {
+        "message": "Addresses fetched successfully",
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "data": addresses,
+    }
 
 
 def get_single_address(id, db):

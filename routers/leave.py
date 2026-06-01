@@ -3,14 +3,7 @@ from sqlalchemy.orm import Session
 
 from core.database import get_db
 from schemas.leave import LeaveSchema
-from services.leave_service import (
-    create_leave,
-    delete_leave,
-    get_all_leave,
-    get_single_leave,
-    update_leave,
-)
-
+from services.leave_service import create_leave, get_all_leave, get_single_leave, update_leave, delete_leave
 
 router = APIRouter(prefix="/leave", tags=["leave"])
 
@@ -21,8 +14,8 @@ def CreateLeave(data: LeaveSchema, db: Session = Depends(get_db)):
 
 
 @router.get("/")
-def GetAllLeave(db: Session = Depends(get_db)):
-    return get_all_leave(db)
+def GetAllLeave(page: int = 1, limit: int = 12, search: str = None, status: str = None, doctor_id: int = None, specific_date: str = None, sort_by: str = "id", sort_order: str = "asc", db: Session = Depends(get_db)):
+    return get_all_leave(db, page, limit, search, status, doctor_id, specific_date, sort_by, sort_order)
 
 
 @router.get("/{id}")

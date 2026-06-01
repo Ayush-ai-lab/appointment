@@ -1,4 +1,5 @@
 from models.doctor_model import Doctor
+from sqlalchemy import or_
 
 
 def create_doctor(data, db):
@@ -20,11 +21,48 @@ def create_doctor(data, db):
     return {"message": "Doctor created successfully", "data": doctor}
 
 
-def get_all_doctor(db):
-    doctors = db.query(Doctor).all()
-    if not doctors:
-        return {"message": "No doctor found"}
-    return {"message": "Doctors fetch successfully", "data": doctors}
+def get_all_doctor(db, page: int = 1, limit: int = 12, search: str = None, status: str = None, category_id: int = None, sort_by: str = "id", sort_order: str = "asc"):
+    query = db.query(Doctor)
+
+    if status is not None:
+        query = query.filter(Doctor.status == status)
+
+    if category_id is not None:
+        query = query.filter(Doctor.category_id == category_id)
+
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            or_(
+                Doctor.name.ilike(search_term),
+                Doctor.email.ilike(search_term),
+                Doctor.qualification.ilike(search_term),
+                Doctor.bio.ilike(search_term),
+            )
+        )
+
+    total = query.count()
+    sort_column = getattr(Doctor, sort_by, Doctor.id)
+    if sort_order and sort_order.lower() == "desc":
+        query = query.order_by(sort_column.desc())
+    else:
+        query = query.order_by(sort_column.asc())
+
+    if page < 1:
+        page = 1
+    if limit < 1:
+        limit = 12
+
+    offset = (page - 1) * limit
+    doctors = query.offset(offset).limit(limit).all()
+
+    return {
+        "message": "Doctors fetched successfully",
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "data": doctors,
+    }
 
 
 def get_single_doctor(id, db):

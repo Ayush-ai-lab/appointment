@@ -1,4 +1,5 @@
 from models.category_model import Category
+from sqlalchemy import or_
 
 
 def create_category(data, db):
@@ -18,11 +19,48 @@ def create_category(data, db):
     return {"message": "Category created successfully", "data": category}
 
 
-def get_all_category(db):
-    categories = db.query(Category).all()
-    if not categories:
-        return {"message": "No category found"}
-    return {"message": "Categories fetch successfully", "data": categories}
+def get_all_category(db, page: int = 1, limit: int = 12, search: str = None, status: str = None, department_id: int = None, sort_by: str = "id", sort_order: str = "asc"):
+    query = db.query(Category)
+
+    if status is not None:
+        query = query.filter(Category.status == status)
+
+    if department_id is not None:
+        query = query.filter(Category.department_id == department_id)
+
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            or_(
+                Category.name.ilike(search_term),
+                Category.slug.ilike(search_term),
+                Category.short_description.ilike(search_term),
+                Category.description.ilike(search_term),
+            )
+        )
+
+    total = query.count()
+    sort_column = getattr(Category, sort_by, Category.id)
+    if sort_order and sort_order.lower() == "desc":
+        query = query.order_by(sort_column.desc())
+    else:
+        query = query.order_by(sort_column.asc())
+
+    if page < 1:
+        page = 1
+    if limit < 1:
+        limit = 12
+
+    offset = (page - 1) * limit
+    categories = query.offset(offset).limit(limit).all()
+
+    return {
+        "message": "Categories fetched successfully",
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "data": categories,
+    }
 
 
 def get_single_category(id, db):

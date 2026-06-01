@@ -1,4 +1,5 @@
 from models.slot_model import Slot
+from sqlalchemy import or_
 
 
 def create_slot(data, db):
@@ -17,11 +18,44 @@ def create_slot(data, db):
     return {"message": "Slot created successfully", "data": slot}
 
 
-def get_all_slot(db):
-    slots = db.query(Slot).all()
-    if not slots:
-        return {"message": "No slot found"}
-    return {"message": "Slots fetch successfully", "data": slots}
+def get_all_slot(db, page: int = 1, limit: int = 12, search: str = None, status: str = None, doctor_id: int = None, slot_date: str = None, sort_by: str = "id", sort_order: str = "asc"):
+    query = db.query(Slot)
+
+    if status is not None:
+        query = query.filter(Slot.status == status)
+
+    if doctor_id is not None:
+        query = query.filter(Slot.doctor_id == doctor_id)
+
+    if slot_date is not None:
+        query = query.filter(Slot.slot_date == slot_date)
+
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(Slot.slot_date.ilike(search_term))
+
+    total = query.count()
+    sort_column = getattr(Slot, sort_by, Slot.id)
+    if sort_order and sort_order.lower() == "desc":
+        query = query.order_by(sort_column.desc())
+    else:
+        query = query.order_by(sort_column.asc())
+
+    if page < 1:
+        page = 1
+    if limit < 1:
+        limit = 12
+
+    offset = (page - 1) * limit
+    slots = query.offset(offset).limit(limit).all()
+
+    return {
+        "message": "Slots fetched successfully",
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "data": slots,
+    }
 
 
 def get_single_slot(id, db):

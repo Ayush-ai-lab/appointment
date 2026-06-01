@@ -3,14 +3,7 @@ from sqlalchemy.orm import Session
 
 from core.database import get_db
 from schemas.meeting import MeetingSchema
-from services.meeting_service import (
-    create_meeting,
-    delete_meeting,
-    get_all_meeting,
-    get_single_meeting,
-    update_meeting,
-)
-
+from services.meeting_service import create_meeting, get_all_meeting, get_single_meeting, update_meeting, delete_meeting
 
 router = APIRouter(prefix="/meeting", tags=["meeting"])
 
@@ -21,8 +14,8 @@ def CreateMeeting(data: MeetingSchema, db: Session = Depends(get_db)):
 
 
 @router.get("/")
-def GetAllMeeting(db: Session = Depends(get_db)):
-    return get_all_meeting(db)
+def GetAllMeeting(page: int = 1, limit: int = 12, search: str = None, status: str = None, sort_by: str = "id", sort_order: str = "asc", db: Session = Depends(get_db)):
+    return get_all_meeting(db, page, limit, search, status, sort_by, sort_order)
 
 
 @router.get("/{id}")

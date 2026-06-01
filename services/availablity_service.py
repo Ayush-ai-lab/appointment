@@ -1,4 +1,5 @@
 from models.availablity_model import DoctorAvailability
+from sqlalchemy import or_
 
 
 def create_availability(data, db):
@@ -22,11 +23,52 @@ def create_availability(data, db):
     return {"message": "Availability created successfully", "data": availability}
 
 
-def get_all_availability(db):
-    availabilities = db.query(DoctorAvailability).all()
-    if not availabilities:
-        return {"message": "No availability found"}
-    return {"message": "Availabilities fetch successfully", "data": availabilities}
+def get_all_availability(db, page: int = 1, limit: int = 12, search: str = None, status: str = None, doctor_id: int = None, day_of_week: str = None, specific_date: str = None, sort_by: str = "id", sort_order: str = "asc"):
+    query = db.query(DoctorAvailability)
+
+    if status is not None:
+        query = query.filter(DoctorAvailability.status == status)
+
+    if doctor_id is not None:
+        query = query.filter(DoctorAvailability.doctor_id == doctor_id)
+
+    if day_of_week is not None:
+        query = query.filter(DoctorAvailability.day_of_week == day_of_week)
+
+    if specific_date is not None:
+        query = query.filter(DoctorAvailability.specific_date == specific_date)
+
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            or_(
+                DoctorAvailability.day_of_week.ilike(search_term),
+                DoctorAvailability.specific_date.ilike(search_term),
+            )
+        )
+
+    total = query.count()
+    sort_column = getattr(DoctorAvailability, sort_by, DoctorAvailability.id)
+    if sort_order and sort_order.lower() == "desc":
+        query = query.order_by(sort_column.desc())
+    else:
+        query = query.order_by(sort_column.asc())
+
+    if page < 1:
+        page = 1
+    if limit < 1:
+        limit = 12
+
+    offset = (page - 1) * limit
+    availabilities = query.offset(offset).limit(limit).all()
+
+    return {
+        "message": "Availabilities fetched successfully",
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "data": availabilities,
+    }
 
 
 def get_single_availability(id, db):

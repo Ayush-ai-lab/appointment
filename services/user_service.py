@@ -1,4 +1,5 @@
 from models.user_model import User
+from sqlalchemy import or_
 
 
 def create_user(data, db):
@@ -18,11 +19,43 @@ def create_user(data, db):
     return {"message": "User created successfully", "data": user}
 
 
-def get_all_user(db):
-    users = db.query(User).all()
-    if not users:
-        return {"message": "No user found"}
-    return {"message": "Users fetch successfully", "data": users}
+def get_all_user(db, page: int = 1, limit: int = 12, search: str = None, status: str = None, sort_by: str = "id", sort_order: str = "asc"):
+    query = db.query(User)
+
+    if status is not None:
+        query = query.filter(User.status == status)
+
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            or_(
+                User.name.ilike(search_term),
+                User.email.ilike(search_term),
+            )
+        )
+
+    total = query.count()
+    sort_column = getattr(User, sort_by, User.id)
+    if sort_order and sort_order.lower() == "desc":
+        query = query.order_by(sort_column.desc())
+    else:
+        query = query.order_by(sort_column.asc())
+
+    if page < 1:
+        page = 1
+    if limit < 1:
+        limit = 12
+
+    offset = (page - 1) * limit
+    users = query.offset(offset).limit(limit).all()
+
+    return {
+        "message": "Users fetched successfully",
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "data": users,
+    }
 
 
 def get_single_user(id, db):

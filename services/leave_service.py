@@ -1,4 +1,5 @@
 from models.leave_model import Leave
+from sqlalchemy import or_
 
 
 def create_leave(data, db):
@@ -15,11 +16,44 @@ def create_leave(data, db):
     return {"message": "Leave created successfully", "data": leave}
 
 
-def get_all_leave(db):
-    leaves = db.query(Leave).all()
-    if not leaves:
-        return {"message": "No leave found"}
-    return {"message": "Leaves fetch successfully", "data": leaves}
+def get_all_leave(db, page: int = 1, limit: int = 12, search: str = None, status: str = None, doctor_id: int = None, specific_date: str = None, sort_by: str = "id", sort_order: str = "asc"):
+    query = db.query(Leave)
+
+    if status is not None:
+        query = query.filter(Leave.status == status)
+
+    if doctor_id is not None:
+        query = query.filter(Leave.doctor_id == doctor_id)
+
+    if specific_date is not None:
+        query = query.filter(Leave.specific_date == specific_date)
+
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(Leave.specific_date.ilike(search_term))
+
+    total = query.count()
+    sort_column = getattr(Leave, sort_by, Leave.id)
+    if sort_order and sort_order.lower() == "desc":
+        query = query.order_by(sort_column.desc())
+    else:
+        query = query.order_by(sort_column.asc())
+
+    if page < 1:
+        page = 1
+    if limit < 1:
+        limit = 12
+
+    offset = (page - 1) * limit
+    leaves = query.offset(offset).limit(limit).all()
+
+    return {
+        "message": "Leaves fetched successfully",
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "data": leaves,
+    }
 
 
 def get_single_leave(id, db):
