@@ -1,13 +1,13 @@
 from models.user_model import User
 from sqlalchemy import or_
-
+from core.security import hash_password
 
 def create_user(data, db):
     user = User(
         name=data.name,
         email=data.email,
         number=data.number,
-        password=data.password,
+        password=hash_password(data.password),
         age=data.age,
         created_by=data.created_by,
         updated_by=data.updated_by,
@@ -73,7 +73,7 @@ def update_user(id, data, db):
     user.name = data.name
     user.email = data.email
     user.number = data.number
-    user.password = data.password
+    user.password = hash_password(data.password),
     user.age = data.age
     user.updated_by = data.updated_by
     user.status = data.status
