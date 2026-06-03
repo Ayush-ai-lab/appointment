@@ -10,7 +10,7 @@ from models.user_model import User
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="login"
 )
-
+#header se token nikalna hai 
 def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
@@ -19,8 +19,8 @@ def get_current_user(
     try:
         payload = jwt.decode(
             token,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM]
+            settings.secret_key,
+            algorithms=[settings.algorithm]
         )
 
         user_id = payload.get("user_id")
@@ -46,5 +46,11 @@ def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found"
         )
-
+    
     return user
+
+
+def admin_required(current_user = Depends(get_current_user )):
+    if current_user.role != "admin":
+        raise HTTPException (status_code= 403,
+                             detail= "Access denied")

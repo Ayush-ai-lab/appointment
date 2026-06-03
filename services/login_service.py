@@ -3,6 +3,10 @@ from core.security import (
     verify_password,
     create_access_token
 )
+from core.auth import (
+    get_current_user,
+    admin_required
+)
 
 def login_user(data, db):
 
@@ -22,7 +26,8 @@ def login_user(data, db):
     token = create_access_token(
         {
             "user_id": user.id,
-            "email": user.email
+            "email": user.email,
+            "role": user.role
         }
     )
 
@@ -30,3 +35,5 @@ def login_user(data, db):
         "access_token": token,
         "token_type": "bearer"
     }
+
+

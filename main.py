@@ -1,5 +1,6 @@
 from fastapi import FastAPI 
 from core.database import Base, engine
+from fastapi.staticfiles import StaticFiles
 from models.address_model import Address
 from models.appointment_model import Appointment
 from models.availablity_model import DoctorAvailability
